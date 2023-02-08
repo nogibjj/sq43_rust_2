@@ -1,15 +1,13 @@
 #![allow(unused)]
 extern crate clap;
-use clap::{Arg, App, SubCommand};
+use clap::Parser;
 use std::path::PathBuf;
 
 #[derive(Parser)]
 struct Cli {
     /// A specific word to find
-    #[clap(short, long)]
     pattern: String,
     /// file to open
-    #[clap(short, long)]
     file: std::path::PathBuf,
 }
 
@@ -29,10 +27,11 @@ fn main() {
     //                     .get_matches();
 
     // let path = PathBuf::from(matches.value_of("file").unwrap());
+    let args = Cli::parse();
     use std::collections::HashMap;
     let mut map: HashMap<&str, i32> = HashMap::new();
     let args = Cli::parse();
-    let result = std::fs::read_to_string(path);
+    let result = std::fs::read_to_string(args.file);
     let content = match result {
         Ok(content) => { content },
         Err(error) => { panic!("Can't deal with {}, just exit here", error); }
@@ -52,8 +51,15 @@ fn main() {
     // println!("{}", count)
     if args.pattern =="all" {
         for (word, occur) in &map {
-            println!("{word:?} : {occur}")
+            println!("{word:?} : {occur}");
         }
     }
-
+    else {
+        if !map.contains_key(&args.pattern as &str) {
+            println!("{} : 0", args.pattern);
+        }
+        else {
+            println!("\"{}\" : {}", args.pattern, map.get(&args.pattern as &str).unwrap());
+        }
+    }
 }
